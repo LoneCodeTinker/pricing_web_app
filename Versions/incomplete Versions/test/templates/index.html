@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Web App</title>
+    <script>
+        function updateFields() {
+            const item = document.getElementById('item').value;
+            const fieldsContainer = document.getElementById('fields');
+            fieldsContainer.innerHTML = '';
+
+            let fields = [];
+  
+            if (item === 'banner') {
+                fields = ['height', 'width'];
+            } else if (item === 'box') {
+                fields = ['height', 'width', 'depth'];
+            } else if (item === 'book') {
+                fields = ['height', 'width', 'pages'];
+            }
+
+            fields.forEach(field => {
+                const label = document.createElement('label');
+                label.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)}:`;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = field;
+                input.id = field;
+
+                const div = document.createElement('div');
+                div.appendChild(label);
+                div.appendChild(input);
+
+                fieldsContainer.appendChild(div);
+            });
+        }
+
+        function calculatePrice() {
+            const item = document.getElementById('item').value;
+            const fields = {};
+
+            Array.from(document.querySelectorAll('#fields input')).forEach(input => {
+                fields[input.name] = input.value;
+            });
+
+            fetch('/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item, fields })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').textContent = `Price: $${data.price.toFixed(2)}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Pricing Web App</h1>
+    <label for="item">Select Item:</label>
+    <select id="item" onchange="updateFields()">
+        <option value="">-- Select --</option>
+        <option value="banner">Banner</option>
+        <option value="box">Box</option>
+        <option value="book">Book</option>
+    </select>
+
+    <div id="fields"></div>
+
+    <button onclick="calculatePrice()">Calculate Price</button>
+
+    <h2 id="result"></h2>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 800px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 50px;
+            margin-right: 10px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #009688;
+        }
+        form {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .full-width {
+            grid-column: span 4;
+        }
+        .totals {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            grid-column: span 4;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .grand-total {
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="data/McLogo.png" alt="Company Logo">
+                <h1>Pricing App</h1>
+            </div>
+            <p>Date: <strong>2025-01-25</strong></p>
+        </div>
+        <form>
+            <div>
+                <label for="client-type">Client Type:</label>
+                <input type="text" id="client-type">
+            </div>
+            <div>
+                <label for="date">Date:</label>
+                <input type="text" id="date" value="2025-01-25" readonly>
+            </div>
+            <div>
+                <label for="item">Item:</label>
+                <select id="item">
+                    <option value="">Select Item</option>
+                </select>
+            </div>
+            <div>
+                <label for="model">Model:</label>
+                <select id="model">
+                    <option value="">Select Model</option>
+                </select>
+            </div>
+            <div>
+                <label for="num-pages">Number of Pages:</label>
+                <input type="number" id="num-pages" min="1">
+            </div>
+            <div>
+                <label for="x">X:</label>
+                <input type="text" id="x">
+            </div>
+            <div>
+                <label for="y">Y:</label>
+                <input type="text" id="y">
+            </div>
+            <div>
+                <label for="z">Z:</label>
+                <input type="text" id="z">
+            </div>
+            <div>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" min="1">
+            </div>
+            <div class="full-width">
+                <label for="comments">Comments:</label>
+                <textarea id="comments" rows="3"></textarea>
+            </div>
+            <div>
+                <label for="unit-price">Unit Price:</label>
+                <input type="text" id="unit-price" readonly>
+            </div>
+            <div>
+                <label for="discount">Discount:</label>
+                <input type="text" id="discount" value="0">
+            </div>
+            <div>
+                <label for="vat">VAT:</label>
+                <input type="text" id="vat" value="0" readonly>
+            </div>
+            <div class="totals">
+                <span>Grand Total:</span>
+                <span class="grand-total">0.00</span>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing App</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        input[readonly], input:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .inline {
+            display: flex;
+            gap: 10px;
+        }
+
+        .inline button {
+            width: auto;
+        }
+
+        .gap {
+            margin-top: 20px;
+        }
+
+        #pricing-form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #book-options {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            margin: 0;
+            transform: scale(1.2); /* Slightly enlarge the radio buttons for better visibility */
+            cursor: pointer;
+        }
+
+        /* Styling for the bordered container */
+        .bordered-container {
+            border: 2px solid #333;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bordered-label {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .inline {
+            display: flex;
+            gap: 20px;
+        }
+
+        .inline div {
+            flex: 1; /* Distribute width evenly between height and width input fields */
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pricing App</h1>
+
+        <!-- Item Selection -->
+        <div>
+            <label for="items">Select Item:</label>
+            <select id="items">
+                <option value="">-- Select an Item --</option>
+                {% for item in items %}
+                <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Model Selection -->
+        <div>
+            <label id="models-label" for="models">Select Model:</label>
+            <select id="models" disabled>
+                <option value="">-- Select a Model --</option>
+            </select>
+        </div>
+
+        <!-- Dynamic Options for Books -->
+        <div id="book-options" style="display: none;">
+            <div class="radio-group">
+                <label>Select Binding Type:</label>
+                <!-- Binding options dynamically generated here -->
+            </div>
+            <div>
+                <label for="num-pages">Number of Pages:</label>
+                <input type="number" id="num-pages" min="1" placeholder="Enter number of pages">
+            </div>
+        </div>
+
+
+<!--        &lt;!&ndash; Dynamic Options for Banners &ndash;&gt;-->
+<!--        <div id="banner-options" style="display: none;">-->
+<!--            <div>-->
+<!--                <label for="banner-height">Height (cm):</label>-->
+<!--                <input type="number" id="banner-height" min="1" placeholder="Enter height in cm">-->
+<!--            </div>-->
+<!--            <div>-->
+<!--                <label for="banner-width">Width (cm):</label>-->
+<!--                <input type="number" id="banner-width" min="1" placeholder="Enter width in cm">-->
+<!--            </div>-->
+<!--        </div>-->
+        <!-- Dynamic Options for Banners -->
+        <div id="banner-options" style="display: none;">
+            <div class="bordered-container">
+                <label class="bordered-label">Print Size:</label>
+                <div class="inline">
+                    <div>
+                        <label for="banner-height">Height (cm):</label>
+                        <input type="number" id="banner-height" min="1" placeholder="Enter height in cm">
+                    </div>
+                    <div>
+                        <label for="banner-width">Width (cm):</label>
+                        <input type="number" id="banner-width" min="1" placeholder="Enter width in cm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Form -->
+        <form id="pricing-form">
+            <div>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" value="1" min="1">
+            </div>
+            <div>
+                <label for="unit-price">Unit Price:</label>
+                <input type="text" id="unit-price" readonly>
+            </div>
+            <div>
+                <label for="total">Total (without VAT):</label>
+                <input type="text" id="total" readonly>
+            </div>
+            <div>
+                <label for="vat">VAT (15%):</label>
+                <input type="text" id="vat" readonly>
+            </div>
+            <div>
+                <label for="total-with-vat">Total (with VAT):</label>
+                <input type="text" id="total-with-vat" readonly>
+            </div>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>
