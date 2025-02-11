@@ -46,7 +46,7 @@ Start the Flask development server:
 The app will be available at http://127.0.0.1:5000/ by default.
 How It Works
 
-* Dynamic Pricing: The app pulls item data from an Excel file and displays dynamic fields based on the item type (e.g., banners, boxes). For example:
+Dynamic Pricing: The app pulls item data from an Excel file and displays dynamic fields based on the item type (e.g., banners, boxes). For example:
 * Banners: User inputs height and width, and the app calculates the price based on a per-unit price formula.
 Boxes: Prices are calculated based on size (height, width, depth) and custom calculations for specific models.
 Books: Additional fields like binding type and number of pages are dynamically shown and used to calculate the total.
