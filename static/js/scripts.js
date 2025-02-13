@@ -1,178 +1,125 @@
-//$(document).ready(function () {
-//    // Populate models based on selected item
-//    $('#item-select').on('change', function () {
-//        const selectedItem = $(this).val();
-//        if (selectedItem) {
-//                $.ajax({
-//                    type: 'POST',
-//                    url: '/get_models',
-//                    contentType: 'application/json',
-//                    data: JSON.stringify({ item: selectedItem }),
-//                    success: function (data) {
-//                        if (data.length > 0) {
-//                            // Populate the models dropdown
-//                            $('#models').empty();
-//                            data.forEach(function (model) {
-//                                $('#models').append(
-//                                    `<option value="${model.Model}">${model.Model} - ${model.Description} - $${model.Price}</option>`
-//                                );
-//                            });
-//                            $('#models').prop('disabled', false); // Enable the dropdown
-//                        } else {
-//                            console.error('No models found for the selected item.');
-//                            alert('No models available for the selected item.');
-//                        }
-//                    },
-//                    error: function () {
-//                        console.error('Error fetching models.');
-//                        alert('Error fetching models. Please try again.');
-//                    },
-//                });
-//
-//            $.ajax({
-//                url: '/get_models',
-//                type: 'POST',
-//                contentType: 'application/json',
-//                data: JSON.stringify({ item: selectedItem }),
-//                success: function (response) {
-//                    const models = response.models;
-//                    $('#model-select').empty().append('<option value="">-- Select a Model --</option>');
-//                    models.forEach(model => {
-//                        $('#model-select').append(`<option value="${model}">${model}</option>`);
-//                    });
-//                    $('#model-select').prop('disabled', false);
-//
-//                    if (selectedItem === 'Book') {
-//                        $('#model-label').text('Size:');
-//                        $('#book-fields').show();
-//                    } else {
-//                        $('#model-label').text('Select Model:');
-//                        $('#book-fields').hide();
-//                    }
-//
-//                    $('#extra-fields').show();
-//                },
-//                error: function () {
-//                    alert('Error fetching models. Please try again.');
-//                }
-//            });
-//        } else {
-//            $('#model-select').empty().append('<option value="">-- Select a Model --</option>').prop('disabled', true);
-//            $('#extra-fields').hide();
-//            $('#book-fields').hide();
-//        }
-//    });
-//
-//    // Calculate price on button click
-//    $('#calculate-btn').on('click', function () {
-//        const item = $('#item-select').val();
-//        const model = $('#model-select').val();
-//        const quantity = parseFloat($('#quantity').val()) || 0;
-//        const numPages = parseFloat($('#num-pages').val()) || 0;
-//        const bindingType = $('input[name="binding"]:checked').val() || '';
-//
-//        if (!item || !model) {
-//            alert('Please select an item and a model.');
-//            return;
-//        }
-//
-//        $.ajax({
-//            url: '/calculate',
-//            type: 'POST',
-//            contentType: 'application/json',
-//            data: JSON.stringify({
-//                item: item,
-//                model: model,
-//                quantity: quantity,
-//                num_pages: numPages,
-//                binding_type: bindingType
-//            }),
-//            success: function (response) {
-//                $('#unit-price').text(response.unit_price.toFixed(2));
-//                $('#total-price').text(response.total_price.toFixed(2));
-//                $('#vat').text(response.vat.toFixed(2));
-//                $('#total-with-vat').text(response.total_with_vat.toFixed(2));
-//                $('#result-fields').show();
-//            },
-//            error: function () {
-//                alert('Error calculating price. Please try again.');
-//            }
-//        });
-//    });
-//});
 $(document).ready(function () {
-    // When an item is selected, fetch models
+    // Handle item selection
     $('#items').on('change', function () {
         const selectedItem = $(this).val();
-        if (!selectedItem) return; // No item selected, exit early
-        if (selectedItem) {
-            // Make an AJAX request to fetch models for the selected item
-            $.ajax({
-                type: 'POST',
-                url: '/get_models',
-                contentType: 'application/json',
-                data: JSON.stringify({ item: selectedItem }),
-                success: function (data) {
-                    console.log('Models data received:', data); // Log the received data
-                    if (data.length > 0) {
-                        // Populate the models dropdown
-                        $('#models').empty();
-//                        data.forEach(function (model) {
-//                            $('#models').append(
-//                                `<option value="${model.Model}">${model.Model} - ${model.Description} - $${model.Price}</option>`
-//                            );
-//                        });
-                        data.forEach(function (model) {
-                            $('#models').append(
-                                `<option value="${model.Model}" data-price="${model.Price}">
-                                  ${model.Model} - ${model.Description || 'No description available'}
-                                </option>`
-                            );
-                        });
 
-                        $('#models').prop('disabled', false); // Enable the dropdown
-                    } else {
-                        console.error('No models found for the selected item.');
-                        alert('No models available for the selected item.');
-                    }
-                },
-                error: function () {
-                    console.error('Error fetching models.');
-                    alert('Error fetching models. Please try again.');
-                },
-            });
+        // Show/Hide book options and adjust labels
+        if (selectedItem === 'Books') {
+            $('#models-label').text('Size:');
+            $('#book-options').show(); // Show book-specific fields
+            $('#num-pages').show();   // Ensure the number of pages field is visible
+            loadBookPricing(); // Load book-specific options
         } else {
-            // Clear and disable the models dropdown if no item is selected
-            $('#models').empty().prop('disabled', true);
+            $('#models-label').text('Model:');
+            $('#book-options').hide();
+            $('#num-pages').val(''); // Clear number of pages
+            $('input[name="binding-type"]').prop('checked', false); // Clear binding options
         }
+
+        // Fetch and update models for the selected item
+        fetchModels(selectedItem);
     });
 
+    // Fetch models based on selected item
+    function fetchModels(selectedItem) {
+        $.ajax({
+            url: '/get_models',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ item: selectedItem }),
+            success: function (data) {
+                const modelsDropdown = $('#models');
+                modelsDropdown.empty();
+
+                if (data.length === 0) {
+                    modelsDropdown.append('<option value="" disabled>No models available</option>');
+                    modelsDropdown.prop('disabled', true);
+                    $('#unit-price').val('');
+                    calculateTotals();
+                    return;
+                }
+
+                modelsDropdown.prop('disabled', false);
+                data.forEach(function (model) {
+                    modelsDropdown.append(
+                        `<option value="${model.Price}" data-description="${model.Description || 'No description'}">
+                            ${model.Model} - ${model.Description || 'No description'}
+                        </option>`
+                    );
+                });
+                modelsDropdown.prop('selectedIndex', 0).trigger('change'); // Trigger default selection
+            },
+            error: function () {
+                alert('Error fetching models. Please try again.');
+            }
+        });
+    }
+
+    // Handle model selection and update unit price
     $('#models').on('change', function () {
         const selectedModel = $(this).find(':selected');
-        const unitPrice = parseFloat(selectedModel.data('price')) || 0; // Fetch the price from the dropdown option
-
-        console.log('Selected model price:', unitPrice);
-
-        $('#unit-price').val(unitPrice.toFixed(2)); // Set the unit price
-        calculateTotals(); // Update totals when a model is selected
+        const unitPrice = parseFloat(selectedModel.val()) || 0; // Price from the models dropdown
+        $('#unit-price').val(unitPrice.toFixed(2));
+        calculateTotals();
     });
 
-    $('#quantity').on('input', function () {
-        calculateTotals(); // Update totals when the quantity changes
+    // Load book-specific pricing options
+    function loadBookPricing() {
+        $.ajax({
+            url: '/get_book_pricing',
+            type: 'GET',
+            success: function (data) {
+                const bookOptionsContainer = $('#book-options');
+                bookOptionsContainer.empty();
+
+                if (data.length > 0) {
+                    data.forEach(option => {
+                        const radioButton = `
+                            <div>
+                                <input type="radio" id="${option['binding type']}" name="binding-type" value="${option['binding cost']}">
+                                <label for="${option['binding type']}">${option['binding type']} (${option['binding cost']}/unit)</label>
+                            </div>
+                        `;
+                        bookOptionsContainer.append(radioButton);
+                    });
+                } else {
+                    bookOptionsContainer.append('<p>No binding options available</p>');
+                }
+            },
+            error: function () {
+                console.error('Error fetching book pricing data.');
+            }
+        });
+    }
+
+    // Handle changes in binding type and other inputs
+    $('body').on('change', 'input[name="binding-type"], #num-pages, #quantity', function () {
+        calculateTotals();
     });
 
+    // Calculate totals based on inputs
     function calculateTotals() {
         const unitPrice = parseFloat($('#unit-price').val()) || 0;
-        const quantity = parseInt($('#quantity').val(), 10) || 1;
+        const quantity = parseInt($('#quantity').val()) || 0;
 
-        const total = unitPrice * quantity;
+        let total = unitPrice * quantity;
         const vat = total * 0.15;
-        const totalWithVat = total + vat;
+        let totalWithVat = total + vat;
 
-        // Update the corresponding fields
+        // Additional calculation for books
+        const selectedItem = $('#items').val();
+        if (selectedItem === 'Books') {
+            const numPages = parseInt($('#num-pages').val()) || 0;
+            const pricePerPage = unitPrice; // Unit price from the models dropdown is price per page
+            const bindingCost = parseFloat($('input[name="binding-type"]:checked').val()) || 0;
+
+            total = (numPages * pricePerPage) + bindingCost;
+            totalWithVat = total * quantity + (total * 0.15);
+        }
+
+        // Update totals in the UI
         $('#total').val(total.toFixed(2));
         $('#vat').val(vat.toFixed(2));
         $('#total-with-vat').val(totalWithVat.toFixed(2));
     }
-
 });

@@ -8,10 +8,10 @@
 </head>
 <body>
     <h1>Pricing App</h1>
+
+    <!-- Item Selection -->
     <div>
-<!--        <label for="item-select">Select Item:</label>-->
         <label for="items">Select Item:</label>
-<!--        <select id="item-select">-->
         <select id="items">
             <option value="">-- Select an Item --</option>
             {% for item in items %}
@@ -19,73 +19,51 @@
             {% endfor %}
         </select>
     </div>
+
+    <!-- Model Selection -->
     <div>
-<!--    <label for="model-select" id="model-label">Select Model:</label>-->
-        <label for="models" id="model-label">Select Model:</label>
-<!--    <select id="model-select" disabled>-->
+        <label id="models-label" for="models">Select Model:</label>
         <select id="models" disabled>
             <option value="">-- Select a Model --</option>
         </select>
     </div>
-    <form id="pricing-form">
-  <div>
-    <label for="quantity">Quantity:</label>
-    <input type="number" id="quantity" value="1" min="1">
-  </div>
-  <div>
-    <label for="unit-price">Unit Price:</label>
-    <input type="text" id="unit-price" readonly>
-  </div>
-  <div>
-    <label for="total">Total (without VAT):</label>
-    <input type="text" id="total" readonly>
-  </div>
-  <div>
-    <label for="vat">VAT (15%):</label>
-    <input type="text" id="vat" readonly>
-  </div>
-  <div>
-    <label for="total-with-vat">Total (with VAT):</label>
-    <input type="text" id="total-with-vat" readonly>
-  </div>
-</form>
 
-<!--    <div id="extra-fields" style="display: none;">-->
-<!--        <div>-->
-<!--            <label for="quantity">Quantity:</label>-->
-<!--            <input type="number" id="quantity" min="1" value="1">-->
-<!--        </div>-->
-<!--        <div id="book-fields" style="display: none;">-->
-<!--            <label>Binding Type:</label>-->
-<!--            <div>-->
-<!--                <input type="radio" id="spiral" name="binding" value="Spiral Binding">-->
-<!--                <label for="spiral">Spiral Binding</label>-->
-<!--            </div>-->
-<!--            <div>-->
-<!--                <input type="radio" id="saddle" name="binding" value="Saddle Stitch">-->
-<!--                <label for="saddle">Saddle Stitch</label>-->
-<!--            </div>-->
-<!--            <div>-->
-<!--                <input type="radio" id="perfect" name="binding" value="Perfect Bound">-->
-<!--                <label for="perfect">Perfect Bound</label>-->
-<!--            </div>-->
-<!--            <div>-->
-<!--                <input type="radio" id="hard" name="binding" value="Hard Cover">-->
-<!--                <label for="hard">Hard Cover</label>-->
-<!--            </div>-->
-<!--            <div>-->
-<!--                <label for="num-pages">Number of Pages:</label>-->
-<!--                <input type="number" id="num-pages" min="0" value="0">-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <button id="calculate-btn">Calculate</button>-->
-<!--    </div>-->
-<!--    <div id="result-fields" style="margin-top: 20px; display: none;">-->
-<!--        <div>Unit Price: <span id="unit-price">0</span></div>-->
-<!--        <div>Total Price: <span id="total-price">0</span></div>-->
-<!--        <div>VAT (15%): <span id="vat">0</span></div>-->
-<!--        <div>Total with VAT: <span id="total-with-vat">0</span></div>-->
-<!--    </div>-->
+    <!-- Dynamic Options for Books -->
+    <div id="book-options" style="display: none; margin-top: 1rem;">
+        <div>
+            <label>Select Binding Type:</label>
+            <!-- Binding options dynamically generated here -->
+        </div>
+        <div>
+            <label for="num-pages">Number of Pages:</label>
+            <input type="number" id="num-pages" min="1" placeholder="Enter number of pages">
+        </div>
+    </div>
+
+    <!-- Pricing Form -->
+    <form id="pricing-form" style="margin-top: 1rem;">
+        <div>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" value="1" min="1">
+        </div>
+        <div>
+            <label for="unit-price">Unit Price:</label>
+            <input type="text" id="unit-price" readonly>
+        </div>
+        <div>
+            <label for="total">Total (without VAT):</label>
+            <input type="text" id="total" readonly>
+        </div>
+        <div>
+            <label for="vat">VAT (15%):</label>
+            <input type="text" id="vat" readonly>
+        </div>
+        <div>
+            <label for="total-with-vat">Total (with VAT):</label>
+            <input type="text" id="total-with-vat" readonly>
+        </div>
+    </form>
+
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </body>
 </html>
