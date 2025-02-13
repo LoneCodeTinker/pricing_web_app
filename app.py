@@ -6,12 +6,12 @@ app = Flask(__name__)
 
 # Load data from Excel
 def load_data():
-    items_df = pd.read_excel('data.xlsx', sheet_name='items')
-    models_df = pd.read_excel('data.xlsx', sheet_name='models')
-    return items_df, models_df
+    items_data = pd.read_excel('data.xlsx', sheet_name='items')
+    models_data = pd.read_excel('data.xlsx', sheet_name='models')
+    return items_data, models_data
 
 
-# Load data
+# # Load data
 items_df, models_df = load_data()
 
 
@@ -53,4 +53,4 @@ def calculate_price():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=4910, debug=True)
+    app.run(host='0.0.0.0', port=4911, debug=True)
