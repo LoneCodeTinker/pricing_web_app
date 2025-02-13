@@ -135,8 +135,8 @@ $(document).ready(function () {
 //                pricePerPage = lowest_price;
 //            }
             let discount_factor = (total_num_of_pages - 1000) / (5000 - 1000);
-//            pricePerPage = Math.max(Math.min(highest_price - price_difference * discount_factor, highest_price), lowest_price);
-            pricePerPage = Math.max(Math.min(highest_price - (highest_price - lowest_price) * (total_num_of_pages - 1000) / (5000 - 1000), highest_price), lowest_price);
+            pricePerPage = Math.max(Math.min(highest_price - price_difference * discount_factor, highest_price), lowest_price);
+//            pricePerPage = Math.max(Math.min(highest_price - (highest_price - lowest_price) * (total_num_of_pages - 1000) / (5000 - 1000), highest_price), lowest_price);
             unitPrice = (numPages * pricePerPage) + bindingCost;
         }
 
@@ -167,4 +167,87 @@ document.addEventListener('input', function (event) {
         // Remove any non-numeric characters
         target.value = target.value.replace(/[^0-9]/g, '');
     }
+});
+
+    $("#add-item").click(function () {
+//        const item = $("#items").val();
+//        const model = $("#models").val();
+//        const quantity = parseInt($("#quantity").val()) || 0;
+//        const unitPrice = parseFloat($("#unit-price").val()) || 0;
+//        const total = parseFloat($("#total").val()) || 0;
+//        const vat = parseFloat($("#vat").val()) || 0;
+//        const totalWithVat = parseFloat($("#total-with-vat").val()) || 0;
+//
+//        if (!item || !model || quantity <= 0) {
+//            alert("Please fill all required fields.");
+//            return;
+//        }
+//
+//        // Append to the table
+//        $("#quotation-table tbody").append(`
+//            <tr>
+//                <td>${item}</td>
+//                <td>${model}</td>
+//                <td>${quantity}</td>
+//                <td>${unitPrice.toFixed(2)}</td>
+//                <td>${total.toFixed(2)}</td>
+//                <td>${vat.toFixed(2)}</td>
+//                <td>${totalWithVat.toFixed(2)}</td>
+//                <td><button class="remove-item">Remove</button></td>
+//            </tr>
+//        `);
+//
+//        // Reset fields for next input
+//        $("#items").val("");
+//        $("#models").html('<option value="">-- Select a Model --</option>').prop("disabled", true);
+//        $("#quantity").val(1);
+//        $("#unit-price, #total, #vat, #total-with-vat").val("");
+//
+//        // Remove Item from Table
+//        $(".remove-item").click(function () {
+//            $(this).closest("tr").remove();
+
+    const itemType = $('#items').val();
+    const model = $('#models').val();
+    const quantity = parseInt($('#quantity').val()) || 0;
+    const unitPrice = parseFloat($('#unit-price').val()) || 0;
+    const total = parseFloat($('#total').val()) || 0;
+    const vat = parseFloat($('#vat').val()) || 0;
+    const totalWithVat = parseFloat($('#total-with-vat').val()) || 0;
+
+    if (!itemType || !model || quantity <= 0 || unitPrice <= 0) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    // Add item to the table
+    const newRow = `
+        <tr>
+            <td>${itemType}</td>
+            <td>${model}</td>
+            <td>${quantity}</td>
+            <td>${unitPrice.toFixed(2)}</td>
+            <td>${total.toFixed(2)}</td>
+            <td>${vat.toFixed(2)}</td>
+            <td>${totalWithVat.toFixed(2)}</td>
+            <td><button class="remove-item">❌</button></td>
+        </tr>
+    `;
+
+    $('#quotation-table tbody').append(newRow);
+
+    // Clear input fields after adding the item
+    $('#quantity').val(1);
+    $('#unit-price, #total, #vat, #total-with-vat').val('');
+    });
+
+
+    // Remove item from the table
+    $(document).on('click', '.remove-item', function () {
+    $(this).closest('tr').remove();
+
+    // Save as PDF (Placeholder)
+    $("#save-quotation").click(function () {
+        alert("Generate PDF functionality goes here!");
+    });
 });
