@@ -13,6 +13,34 @@ def load_data():
 items, models_df = load_data()
 
 
+@app.route('/calculate_books', methods=['POST'])
+def calculate_books():
+    data = request.json
+    pages = data.get('pages')
+    binding = data.get('binding')
+
+    if pages is None or binding is None:
+        return jsonify({"error": "Missing book details."}), 400
+
+    # Define binding type costs
+    binding_costs = {
+        "Spiral Binding": 1.0,
+        "Saddle Stitch": 1.5,
+        "Perfect Bound": 2.0,
+        "Hard Cover": 3.0,
+    }
+
+    # Get the price per page from the models DataFrame
+    books_row = models_df[(models_df['Item'] == 'Books')].iloc[0]
+    price_per_page = books_row['Price']
+
+    # Calculate the price
+    binding_price = binding_costs.get(binding, 0)
+    total_price = (price_per_page * pages) + binding_price
+
+    return jsonify({"price": total_price})
+
+
 @app.route('/')
 def index():
     return render_template('index.html', items=items)
@@ -55,4 +83,4 @@ def calculate():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=4910, debug=True)
+    app.run(host='0.0.0.0', port=4911, debug=True)
