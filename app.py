@@ -1,84 +1,90 @@
-from flask import Flask, render_template, request, jsonify
+# `app.py`
+from flask_cors import CORS
+from flask import Flask, jsonify, request, render_template
 import pandas as pd
 
 app = Flask(__name__)
+CORS(app)
+
+# Load data from Excel
+EXCEL_FILE = 'data/data.xlsx'
 
 
 def load_data():
-    items_data = pd.read_excel('data.xlsx', sheet_name='items')
-    models_data = pd.read_excel('data.xlsx', sheet_name='models')
-    return items_data['Item'].tolist(), models_data
+    items_data = pd.read_excel(EXCEL_FILE, sheet_name='items')
+    models_data = pd.read_excel(EXCEL_FILE, sheet_name='models')
+    return items_data, models_data
 
 
-items, models_df = load_data()
-
-
-@app.route('/calculate_books', methods=['POST'])
-def calculate_books():
-    data = request.json
-    pages = data.get('pages')
-    binding = data.get('binding')
-
-    if pages is None or binding is None:
-        return jsonify({"error": "Missing book details."}), 400
-
-    # Define binding type costs
-    binding_costs = {
-        "Spiral Binding": 1.0,
-        "Saddle Stitch": 1.5,
-        "Perfect Bound": 2.0,
-        "Hard Cover": 3.0,
-    }
-
-    # Get the price per page from the models DataFrame
-    books_row = models_df[(models_df['Item'] == 'Books')].iloc[0]
-    price_per_page = books_row['Price']
-
-    # Calculate the price
-    binding_price = binding_costs.get(binding, 0)
-    total_price = (price_per_page * pages) + binding_price
-
-    return jsonify({"price": total_price})
+items_df, models_df = load_data()
 
 
 @app.route('/')
-def index():
-    return render_template('index.html', items=items)
+def home():
+    return render_template('index.html')
+
+
+@app.route('/get_items', methods=['GET'])
+def get_items():
+    items = items_df['Item'].dropna().tolist()
+    print("Serving items:", items)  # debugging
+    return jsonify(items)
 
 
 @app.route('/get_models', methods=['POST'])
 def get_models():
     selected_item = request.json.get('item')
     if not selected_item:
-        return jsonify({"error": "No item selected"}), 400
+        return jsonify([])
 
     filtered_models = models_df[models_df['Item'] == selected_item]
-    models = filtered_models.to_dict(orient='records')
-    return jsonify(models)
+    models_list = filtered_models[['Model', 'Description', 'Price']].to_dict(orient='records')
+    return jsonify(models_list)
 
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
     data = request.json
+    item = data.get('item')
     model = data.get('model')
-    quantity = data.get('quantity', 1)
+    quantity = int(data.get('quantity', 0))
 
-    selected_model = models_df[models_df['Model'] == model]
-    if selected_model.empty:
-        return jsonify({"error": "Model not found"}), 404
+    if not item or not model or quantity <= 0:
+        return jsonify({'error': 'Invalid input'}), 400
 
-    unit_price = float(selected_model['Price'].values[0])
-    description = selected_model['Description'].values[0]
+    filtered_models = models_df[(models_df['Item'] == item) & (models_df['Model'] == model)]
+    if filtered_models.empty:
+        return jsonify({'error': 'Model not found'}), 404
+
+    unit_price = float(filtered_models['Price'].iloc[0])
+
+    if item == 'Book':
+        pages = int(data.get('pages', 0))
+        binding_type = data.get('binding_type')
+
+        if not pages or not binding_type:
+            return jsonify({'error': 'Invalid input for books'}), 400
+
+        binding_prices = {
+            'Spiral Binding': 1.5,
+            'Saddle Stitch': 2.0,
+            'Perfect Bound': 2.5,
+            'Hard Cover': 5.0
+        }
+
+        binding_price = binding_prices.get(binding_type, 0)
+        unit_price = unit_price * pages + binding_price
+
     total = unit_price * quantity
     vat = total * 0.15
     total_with_vat = total + vat
+    print("Received data:", request.json)
 
     return jsonify({
-        "unit_price": unit_price,
-        "description": description,
-        "total": total,
-        "vat": vat,
-        "total_with_vat": total_with_vat
+        'unit_price': round(unit_price, 2),
+        'total': round(total, 2),
+        'vat': round(vat, 2),
+        'total_with_vat': round(total_with_vat, 2)
     })
 
 
