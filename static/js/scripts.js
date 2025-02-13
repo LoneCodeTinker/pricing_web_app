@@ -1,26 +1,30 @@
 $(document).ready(function () {
+    let pricePerPage = 0; // Store price per page for books
+    let unitPrice = 0;    // General unit price for all items
+
     // Handle item selection
     $('#items').on('change', function () {
         const selectedItem = $(this).val();
+        console.log('Selected Item:', selectedItem); // Debugging log
 
-        // Show/Hide book options and adjust labels
         if (selectedItem === 'Books') {
             $('#models-label').text('Size:');
             $('#book-options').show(); // Show book-specific fields
-            $('#num-pages').show();   // Ensure the number of pages field is visible
-            loadBookPricing(); // Load book-specific options
+            $('#num-pages').show();    // Ensure the number of pages field is visible
+            loadBookPricing();         // Load book-specific options
         } else {
             $('#models-label').text('Model:');
-            $('#book-options').hide();
-            $('#num-pages').val(''); // Clear number of pages
-            $('input[name="binding-type"]').prop('checked', false); // Clear binding options
+            $('#book-options').hide(); // Hide book-specific options
+            $('#num-pages').hide();    // Hide number of pages field
+            pricePerPage = 0;          // Reset pricePerPage for non-book items
         }
 
-        // Fetch and update models for the selected item
+        // Fetch models for the selected item
         fetchModels(selectedItem);
+        calculateTotals(); // Ensure totals are recalculated when switching items
     });
 
-    // Fetch models based on selected item
+    // Fetch models based on the selected item
     function fetchModels(selectedItem) {
         $.ajax({
             url: '/get_models',
@@ -34,6 +38,7 @@ $(document).ready(function () {
                 if (data.length === 0) {
                     modelsDropdown.append('<option value="" disabled>No models available</option>');
                     modelsDropdown.prop('disabled', true);
+                    unitPrice = 0; // Reset unit price if no models are available
                     $('#unit-price').val('');
                     calculateTotals();
                     return;
@@ -55,11 +60,12 @@ $(document).ready(function () {
         });
     }
 
-    // Handle model selection and update unit price
+    // Handle model selection
     $('#models').on('change', function () {
         const selectedModel = $(this).find(':selected');
-        const unitPrice = parseFloat(selectedModel.val()) || 0; // Price from the models dropdown
-        $('#unit-price').val(unitPrice.toFixed(2));
+        pricePerPage = parseFloat(selectedModel.val()) || 0; // Set pricePerPage for books
+        unitPrice = pricePerPage;                            // Default unit price for non-books
+        $('#unit-price').val(unitPrice.toFixed(2));          // Update the unit price field
         calculateTotals();
     });
 
@@ -72,6 +78,15 @@ $(document).ready(function () {
                 const bookOptionsContainer = $('#book-options');
                 bookOptionsContainer.empty();
 
+                // Add Number of Pages input dynamically
+                const numPagesHtml = `
+                    <div>
+                        <label for="num-pages">Number of Pages:</label>
+                        <input type="number" id="num-pages" min="1" placeholder="Enter number of pages">
+                    </div>`;
+                bookOptionsContainer.append(numPagesHtml);
+
+                // Add binding type radio buttons dynamically
                 if (data.length > 0) {
                     data.forEach(option => {
                         const radioButton = `
@@ -92,32 +107,29 @@ $(document).ready(function () {
         });
     }
 
-    // Handle changes in binding type and other inputs
+    // Handle changes in binding type, number of pages, and quantity
     $('body').on('change', 'input[name="binding-type"], #num-pages, #quantity', function () {
         calculateTotals();
     });
 
-    // Calculate totals based on inputs
+    // Calculate totals
     function calculateTotals() {
-        const unitPrice = parseFloat($('#unit-price').val()) || 0;
         const quantity = parseInt($('#quantity').val()) || 0;
+        const numPages = parseInt($('#num-pages').val()) || 0;
+        const bindingCost = parseFloat($('input[name="binding-type"]:checked').val()) || 0;
 
-        let total = unitPrice * quantity;
-        const vat = total * 0.15;
-        let totalWithVat = total + vat;
-
-        // Additional calculation for books
-        const selectedItem = $('#items').val();
-        if (selectedItem === 'Books') {
-            const numPages = parseInt($('#num-pages').val()) || 0;
-            const pricePerPage = unitPrice; // Unit price from the models dropdown is price per page
-            const bindingCost = parseFloat($('input[name="binding-type"]:checked').val()) || 0;
-
-            total = (numPages * pricePerPage) + bindingCost;
-            totalWithVat = total * quantity + (total * 0.15);
+        // Calculate unit price dynamically for books
+        if ($('#items').val() === 'Books') {
+            unitPrice = (numPages * pricePerPage) + bindingCost;
         }
 
-        // Update totals in the UI
+        // Calculate totals
+        const total = unitPrice * quantity;
+        const vat = total * 0.15;
+        const totalWithVat = total + vat;
+
+        // Update UI
+        $('#unit-price').val(unitPrice.toFixed(2));
         $('#total').val(total.toFixed(2));
         $('#vat').val(vat.toFixed(2));
         $('#total-with-vat').val(totalWithVat.toFixed(2));
