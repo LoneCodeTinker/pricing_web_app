@@ -1,10 +1,14 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_from_directory
 import pandas as pd
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 
 # Load data from Excel file
 EXCEL_FILE = 'data.xlsx'
+
+
+# Make sure your static folder is correctly set
+app.static_folder = 'static'
 
 
 def load_data():
@@ -33,6 +37,12 @@ def index():
     return render_template('index.html', items=items_list)
 
 
+@app.route('/favicon.ico')
+def favicon():
+    print("Serving favicon.ico")
+    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
 @app.route('/get_models', methods=['POST'])
 def get_models():
     data = request.json
@@ -59,4 +69,4 @@ def get_book_pricing():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=4910, debug=True)
+    app.run(host='0.0.0.0', port=4911, debug=True)

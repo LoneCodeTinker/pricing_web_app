@@ -156,7 +156,53 @@ $(document).ready(function () {
         $('#vat').val(vat.toFixed(2));
         $('#total-with-vat').val(totalWithVat.toFixed(2));
     }
+
+//    function updateTotals() {
+//        let grandTotal = 0;
+//        let grandVAT = 0;
+//        let grandTotalWithVAT = 0;
+//
+//        $('#quotation-table tbody tr').each(function() {
+//            grandTotal += parseFloat($(this).find('td:nth-child(5)').text()) || 0;
+//            grandVAT += parseFloat($(this).find('td:nth-child(6)').text()) || 0;
+//            grandTotalWithVAT += parseFloat($(this).find('td:nth-child(7)').text()) || 0;
+//        });
+//
+//        $('#grand-total').text(grandTotal.toFixed(2));
+//        $('#grand-vat').text(grandVAT.toFixed(2));
+//        $('#grand-total-vat').text(grandTotalWithVAT.toFixed(2));
+//        console.log("Row Total:", total, "VAT:", vat, "Total with VAT:", totalWithVAT);
+//    }
 });
+
+function getColumnIndex(columnName) {
+    return $('#quotation-table thead th[data-column="' + columnName + '"]').index();
+}
+
+function updateTotals() {
+    let totalIndex = getColumnIndex("Total");
+    let vatIndex = getColumnIndex("VAT");
+    let totalWithVatIndex = getColumnIndex("TotalWithVAT");
+
+    let grandTotal = 0;
+    let grandVAT = 0;
+    let grandTotalWithVAT = 0;
+
+    $('#quotation-table tbody tr').each(function() {
+        let total = parseFloat($(this).find('td').eq(totalIndex).text()) || 0;
+        let vat = parseFloat($(this).find('td').eq(vatIndex).text()) || 0;
+        let totalWithVAT = parseFloat($(this).find('td').eq(totalWithVatIndex).text()) || 0;
+
+        grandTotal += total;
+        grandVAT += vat;
+        grandTotalWithVAT += totalWithVAT;
+    });
+
+    $('#grand-total').text(grandTotal.toFixed(2));
+    $('#grand-vat').text(grandVAT.toFixed(2));
+    $('#grand-total-vat').text(grandTotalWithVAT.toFixed(2));
+}
+
 
 // Allow only numeric input in number fields
 document.addEventListener('input', function (event) {
@@ -169,85 +215,71 @@ document.addEventListener('input', function (event) {
     }
 });
 
-    $("#add-item").click(function () {
-//        const item = $("#items").val();
-//        const model = $("#models").val();
-//        const quantity = parseInt($("#quantity").val()) || 0;
-//        const unitPrice = parseFloat($("#unit-price").val()) || 0;
-//        const total = parseFloat($("#total").val()) || 0;
-//        const vat = parseFloat($("#vat").val()) || 0;
-//        const totalWithVat = parseFloat($("#total-with-vat").val()) || 0;
-//
-//        if (!item || !model || quantity <= 0) {
-//            alert("Please fill all required fields.");
-//            return;
-//        }
-//
-//        // Append to the table
-//        $("#quotation-table tbody").append(`
-//            <tr>
-//                <td>${item}</td>
-//                <td>${model}</td>
-//                <td>${quantity}</td>
-//                <td>${unitPrice.toFixed(2)}</td>
-//                <td>${total.toFixed(2)}</td>
-//                <td>${vat.toFixed(2)}</td>
-//                <td>${totalWithVat.toFixed(2)}</td>
-//                <td><button class="remove-item">Remove</button></td>
-//            </tr>
-//        `);
-//
-//        // Reset fields for next input
-//        $("#items").val("");
-//        $("#models").html('<option value="">-- Select a Model --</option>').prop("disabled", true);
-//        $("#quantity").val(1);
-//        $("#unit-price, #total, #vat, #total-with-vat").val("");
-//
-//        // Remove Item from Table
-//        $(".remove-item").click(function () {
-//            $(this).closest("tr").remove();
+    $('#add-item').on('click', function(event) {
+    event.preventDefault(); // Prevent accidental form submission
 
-    const itemType = $('#items').val();
-    const model = $('#models').val();
-    const quantity = parseInt($('#quantity').val()) || 0;
-    const unitPrice = parseFloat($('#unit-price').val()) || 0;
-    const total = parseFloat($('#total').val()) || 0;
-    const vat = parseFloat($('#vat').val()) || 0;
-    const totalWithVat = parseFloat($('#total-with-vat').val()) || 0;
-
-    if (!itemType || !model || quantity <= 0 || unitPrice <= 0) {
+    // Check if required fields are filled
+    if (!$('#items').val() || !$('#models').val() || !$('#quantity').val()) {
         alert("Please fill all required fields.");
         return;
     }
 
-    // Add item to the table
-    const newRow = `
+    // Get values from fields
+    const item = $('#items').val();
+    const model = $('#models').val();
+    const quantity = $('#quantity').val();
+    const unitPrice = $('#unit-price').val();
+    const total = $('#total').val();
+    const vat = $('#vat').val();
+    const totalWithVat = $('#total-with-vat').val();
+    // Get the current row count and add 1 for the new item
+    const rowCount = $('#quotation-table tbody tr').length + 1;
+
+    // Append new row to the table
+    $('#quotation-table tbody').append(`
         <tr>
-            <td>${itemType}</td>
+            <td>${rowCount}</td>
+            <td>${item}</td>
             <td>${model}</td>
             <td>${quantity}</td>
-            <td>${unitPrice.toFixed(2)}</td>
-            <td>${total.toFixed(2)}</td>
-            <td>${vat.toFixed(2)}</td>
-            <td>${totalWithVat.toFixed(2)}</td>
+            <td>${unitPrice}</td>
+            <td>${total}</td>
+            <td>${vat}</td>
+            <td>${totalWithVat}</td>
             <td><button class="remove-item">❌</button></td>
         </tr>
-    `;
+    `);
 
-    $('#quotation-table tbody').append(newRow);
+    updateTotals();
+//    // Clear input fields for next entry
+//    $('#quantity, #unit-price, #total, #vat, #total-with-vat').val('');
 
-    // Clear input fields after adding the item
-    $('#quantity').val(1);
-    $('#unit-price, #total, #vat, #total-with-vat').val('');
+    // Resetting the fields.
+    $("#items").val("");
+    $("#models").html('<option value="">-- Select a Model --</option>').prop("disabled", true);
+    $('#quantity').val(1);  // Reset quantity to 1 instead of clearing
+    $('#num-pages, #banner-height, #banner-width, #unit-price, #total, #vat, #total-with-vat').val(''); // Clear additional fields if needed
+});
+
+    // Remove item from table
+    $('#quotation-table').on('click', '.remove-item', function() {
+        $(this).closest('tr').remove();
+
+//        // Renumber the serial numbers correctly
+//        $('#quotation-table tbody tr').each(function(index) {
+//            $(this).find('td:first').text(index + 1);
+//        });
+        // Get the index of the "S/N" column
+        const snIndex = $('#quotation-table thead th').index($('th:contains("S/N")'));
+
+        // Renumber the serial numbers correctly
+        $('#quotation-table tbody tr').each(function(index) {
+            $(this).find(`td:eq(${snIndex})`).text(index + 1);
+        });
+        updateTotals();
     });
-
-
-    // Remove item from the table
-    $(document).on('click', '.remove-item', function () {
-    $(this).closest('tr').remove();
 
     // Save as PDF (Placeholder)
     $("#save-quotation").click(function () {
         alert("Generate PDF functionality goes here!");
     });
-});

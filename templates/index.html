@@ -95,19 +95,29 @@
         <table id="quotation-table" border="1">
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Model</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Total</th>
-                    <th>VAT</th>
-                    <th>Total with VAT</th>
+                    <th data-column="sn">S/N</th>
+                    <th data-column="Item">Item</th>
+                    <th data-column="Model">Model</th>
+                    <th data-column="Quantity">Quantity</th>
+                    <th data-column="UnitPrice">Unit Price</th>
+                    <th data-column="Total">Total</th>
+                    <th data-column="VAT">VAT (15%)</th>
+                    <th data-column="TotalWithVAT">Total with VAT</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Items will be added here -->
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: right;"><strong>Grand Total:</strong></td>
+                    <td id="grand-total">0.00</td>
+                    <td id="grand-vat">0.00</td>
+                    <td id="grand-total-vat">0.00</td>
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
