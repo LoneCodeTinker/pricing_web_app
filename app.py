@@ -1,91 +1,105 @@
-# `app.py`
-from flask_cors import CORS
 from flask import Flask, jsonify, request, render_template
 import pandas as pd
+import os
 
 app = Flask(__name__)
-CORS(app)
 
-# Load data from Excel
-EXCEL_FILE = 'data/data.xlsx'
+# Load data from Excel file
+EXCEL_FILE = 'data.xlsx'
 
 
 def load_data():
-    items_data = pd.read_excel(EXCEL_FILE, sheet_name='items')
-    models_data = pd.read_excel(EXCEL_FILE, sheet_name='models')
-    return items_data, models_data
+    try:
+        items_df = pd.read_excel(EXCEL_FILE, sheet_name='items')
+        models_df = pd.read_excel(EXCEL_FILE, sheet_name='models')
+        return items_df, models_df
+    except Exception as e:
+        print(f"Error loading data: {e}")
+        return None, None
 
 
 items_df, models_df = load_data()
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
+
 @app.route('/')
-def home():
-    return render_template('index.html')
-
-
-@app.route('/get_items', methods=['GET'])
-def get_items():
-    items = items_df['Item'].dropna().tolist()
-    print("Serving items:", items)  # debugging
-    return jsonify(items)
+def index():
+    if items_df is not None:
+        items = items_df['Item'].tolist()
+    else:
+        items = []
+    return render_template('index.html', items=items)
 
 
 @app.route('/get_models', methods=['POST'])
 def get_models():
-    selected_item = request.json.get('item')
-    if not selected_item:
-        return jsonify([])
-
-    filtered_models = models_df[models_df['Item'] == selected_item]
-    models_list = filtered_models[['Model', 'Description', 'Price']].to_dict(orient='records')
-    return jsonify(models_list)
-
-
-@app.route('/calculate', methods=['POST'])
-def calculate():
     data = request.json
-    item = data.get('item')
-    model = data.get('model')
-    quantity = int(data.get('quantity', 0))
+    selected_item = data.get('item', '')
+    print('Request data:', data)
+    print('Selected item:', selected_item)
+    print('models_df:', models_df)
 
-    if not item or not model or quantity <= 0:
-        return jsonify({'error': 'Invalid input'}), 400
+    if selected_item and models_df is not None:
+        # models = models_df[models_df['Item'] == selected_item]  # previous code without copy
+        models = models_df[models_df['Item'] == selected_item].copy()  # Ensure a copy is made
+        models.fillna('', inplace=True)  # Replace NaN values with an empty string
+        response = models[['Model', 'Description', 'Price']].to_dict(orient='records')
+        print('Response being sent to /get_models:', response)
+        return jsonify(response)
+    else:
+        print("No response")
+        return jsonify([
+            {'Model': 'TestModel1', 'Description': 'Test Description 1', 'Price': 10},
+            {'Model': 'TestModel2', 'Description': 'Test Description 2', 'Price': 15}
+        ])
 
-    filtered_models = models_df[(models_df['Item'] == item) & (models_df['Model'] == model)]
-    if filtered_models.empty:
-        return jsonify({'error': 'Model not found'}), 404
+        # return jsonify([])
 
-    unit_price = float(filtered_models['Price'].iloc[0])
 
-    if item == 'Book':
-        pages = int(data.get('pages', 0))
-        binding_type = data.get('binding_type')
+@app.route('/calculate_price', methods=['POST'])
+def calculate_price():
+    data = request.json
+    item = data.get('item', '')
+    model = data.get('model', '')
+    quantity = data.get('quantity', 1)
+    binding_type = data.get('bindingType', None)
+    num_pages = data.get('numPages', 0)
 
-        if not pages or not binding_type:
-            return jsonify({'error': 'Invalid input for books'}), 400
+    if models_df is not None:
+        # Find the selected model
+        model_row = models_df[(models_df['Item'] == item) & (models_df['Model'] == model)]
+        if not model_row.empty:
+            unit_price = float(model_row['Price'].values[0])
+            total_price = unit_price * int(quantity)
 
-        binding_prices = {
-            'Spiral Binding': 1.5,
-            'Saddle Stitch': 2.0,
-            'Perfect Bound': 2.5,
-            'Hard Cover': 5.0
-        }
+            # Additional calculation for books
+            if item.lower() == 'book':
+                binding_prices = {
+                    'Spiral Binding': 5,
+                    'Saddle Stitch': 10,
+                    'Perfect Bound': 15,
+                    'Hard Cover': 20
+                }
+                binding_cost = binding_prices.get(binding_type, 0)
+                total_price += (float(num_pages) * unit_price) + binding_cost
 
-        binding_price = binding_prices.get(binding_type, 0)
-        unit_price = unit_price * pages + binding_price
+            vat = total_price * 0.15
+            total_with_vat = total_price + vat
 
-    total = unit_price * quantity
-    vat = total * 0.15
-    total_with_vat = total + vat
-    print("Received data:", request.json)
-
-    return jsonify({
-        'unit_price': round(unit_price, 2),
-        'total': round(total, 2),
-        'vat': round(vat, 2),
-        'total_with_vat': round(total_with_vat, 2)
-    })
+            return jsonify({
+                'unitPrice': unit_price,
+                'totalPrice': total_price,
+                'vat': vat,
+                'totalWithVat': total_with_vat
+            })
+        else:
+            return jsonify({'error': 'Model not found'}), 404
+    else:
+        return jsonify({'error': 'Data not loaded'}), 500
 
 
 if __name__ == '__main__':

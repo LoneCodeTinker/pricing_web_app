@@ -1,85 +1,178 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const itemSelect = document.getElementById('item');
-    const modelSelect = document.getElementById('model');
-    const descriptionField = document.getElementById('description');
-    const quantityField = document.getElementById('quantity');
-    const calculateButton = document.getElementById('calculate');
-    const resultFields = {
-        unitPrice: document.getElementById('unit-price'),
-        total: document.getElementById('total'),
-        vat: document.getElementById('vat'),
-        totalWithVat: document.getElementById('total-with-vat')
-    };
+//$(document).ready(function () {
+//    // Populate models based on selected item
+//    $('#item-select').on('change', function () {
+//        const selectedItem = $(this).val();
+//        if (selectedItem) {
+//                $.ajax({
+//                    type: 'POST',
+//                    url: '/get_models',
+//                    contentType: 'application/json',
+//                    data: JSON.stringify({ item: selectedItem }),
+//                    success: function (data) {
+//                        if (data.length > 0) {
+//                            // Populate the models dropdown
+//                            $('#models').empty();
+//                            data.forEach(function (model) {
+//                                $('#models').append(
+//                                    `<option value="${model.Model}">${model.Model} - ${model.Description} - $${model.Price}</option>`
+//                                );
+//                            });
+//                            $('#models').prop('disabled', false); // Enable the dropdown
+//                        } else {
+//                            console.error('No models found for the selected item.');
+//                            alert('No models available for the selected item.');
+//                        }
+//                    },
+//                    error: function () {
+//                        console.error('Error fetching models.');
+//                        alert('Error fetching models. Please try again.');
+//                    },
+//                });
+//
+//            $.ajax({
+//                url: '/get_models',
+//                type: 'POST',
+//                contentType: 'application/json',
+//                data: JSON.stringify({ item: selectedItem }),
+//                success: function (response) {
+//                    const models = response.models;
+//                    $('#model-select').empty().append('<option value="">-- Select a Model --</option>');
+//                    models.forEach(model => {
+//                        $('#model-select').append(`<option value="${model}">${model}</option>`);
+//                    });
+//                    $('#model-select').prop('disabled', false);
+//
+//                    if (selectedItem === 'Book') {
+//                        $('#model-label').text('Size:');
+//                        $('#book-fields').show();
+//                    } else {
+//                        $('#model-label').text('Select Model:');
+//                        $('#book-fields').hide();
+//                    }
+//
+//                    $('#extra-fields').show();
+//                },
+//                error: function () {
+//                    alert('Error fetching models. Please try again.');
+//                }
+//            });
+//        } else {
+//            $('#model-select').empty().append('<option value="">-- Select a Model --</option>').prop('disabled', true);
+//            $('#extra-fields').hide();
+//            $('#book-fields').hide();
+//        }
+//    });
+//
+//    // Calculate price on button click
+//    $('#calculate-btn').on('click', function () {
+//        const item = $('#item-select').val();
+//        const model = $('#model-select').val();
+//        const quantity = parseFloat($('#quantity').val()) || 0;
+//        const numPages = parseFloat($('#num-pages').val()) || 0;
+//        const bindingType = $('input[name="binding"]:checked').val() || '';
+//
+//        if (!item || !model) {
+//            alert('Please select an item and a model.');
+//            return;
+//        }
+//
+//        $.ajax({
+//            url: '/calculate',
+//            type: 'POST',
+//            contentType: 'application/json',
+//            data: JSON.stringify({
+//                item: item,
+//                model: model,
+//                quantity: quantity,
+//                num_pages: numPages,
+//                binding_type: bindingType
+//            }),
+//            success: function (response) {
+//                $('#unit-price').text(response.unit_price.toFixed(2));
+//                $('#total-price').text(response.total_price.toFixed(2));
+//                $('#vat').text(response.vat.toFixed(2));
+//                $('#total-with-vat').text(response.total_with_vat.toFixed(2));
+//                $('#result-fields').show();
+//            },
+//            error: function () {
+//                alert('Error calculating price. Please try again.');
+//            }
+//        });
+//    });
+//});
+$(document).ready(function () {
+    // When an item is selected, fetch models
+    $('#items').on('change', function () {
+        const selectedItem = $(this).val();
+        if (!selectedItem) return; // No item selected, exit early
+        if (selectedItem) {
+            // Make an AJAX request to fetch models for the selected item
+            $.ajax({
+                type: 'POST',
+                url: '/get_models',
+                contentType: 'application/json',
+                data: JSON.stringify({ item: selectedItem }),
+                success: function (data) {
+                    console.log('Models data received:', data); // Log the received data
+                    if (data.length > 0) {
+                        // Populate the models dropdown
+                        $('#models').empty();
+//                        data.forEach(function (model) {
+//                            $('#models').append(
+//                                `<option value="${model.Model}">${model.Model} - ${model.Description} - $${model.Price}</option>`
+//                            );
+//                        });
+                        data.forEach(function (model) {
+                            $('#models').append(
+                                `<option value="${model.Model}" data-price="${model.Price}">
+                                  ${model.Model} - ${model.Description || 'No description available'}
+                                </option>`
+                            );
+                        });
 
-    const bindingTypeSection = document.getElementById('binding-type-section');
-    const pagesField = document.getElementById('pages');
-
-    itemSelect.addEventListener('change', async () => {
-        const selectedItem = itemSelect.value;
-        bindingTypeSection.style.display = selectedItem === 'Books' ? 'block' : 'none';
-
-        const response = await fetch('/get_models', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ item: selectedItem })
-        });
-        const models = await response.json();
-
-        modelSelect.innerHTML = '<option value="">Select Model</option>';
-        models.forEach(model => {
-            const option = document.createElement('option');
-            option.value = model.Model;
-            option.textContent = model.Model;
-            option.dataset.description = model.Description;
-            option.dataset.price = model.Price;
-            modelSelect.appendChild(option);
-        });
+                        $('#models').prop('disabled', false); // Enable the dropdown
+                    } else {
+                        console.error('No models found for the selected item.');
+                        alert('No models available for the selected item.');
+                    }
+                },
+                error: function () {
+                    console.error('Error fetching models.');
+                    alert('Error fetching models. Please try again.');
+                },
+            });
+        } else {
+            // Clear and disable the models dropdown if no item is selected
+            $('#models').empty().prop('disabled', true);
+        }
     });
 
-    modelSelect.addEventListener('change', () => {
-        const selectedOption = modelSelect.options[modelSelect.selectedIndex];
-        descriptionField.value = selectedOption.dataset.description || '';
+    $('#models').on('change', function () {
+        const selectedModel = $(this).find(':selected');
+        const unitPrice = parseFloat(selectedModel.data('price')) || 0; // Fetch the price from the dropdown option
+
+        console.log('Selected model price:', unitPrice);
+
+        $('#unit-price').val(unitPrice.toFixed(2)); // Set the unit price
+        calculateTotals(); // Update totals when a model is selected
     });
 
-    calculateButton.addEventListener('click', async () => {
-        const selectedItem = itemSelect.value;
-        const selectedModel = modelSelect.value;
-        const quantity = parseFloat(quantityField.value) || 0;
-        const bindingType = document.querySelector('input[name="binding-type"]:checked')?.value;
-        const pages = parseInt(pagesField.value, 10) || 0;
-
-        const response = await fetch('/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ item: selectedItem, model: selectedModel, quantity, binding_type: bindingType, pages })
-        });
-        const result = await response.json();
-
-        resultFields.unitPrice.value = result.unit_price || '';
-        resultFields.total.value = result.total || '';
-        resultFields.vat.value = result.vat || '';
-        resultFields.totalWithVat.value = result.total_with_vat || '';
+    $('#quantity').on('input', function () {
+        calculateTotals(); // Update totals when the quantity changes
     });
-});
-document.getElementById("item").addEventListener("change", function () {
-    const selectedItem = this.value;
-    console.log("Selected item:", selectedItem);  // Debugging
-    fetch('/get_models', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item: selectedItem })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Models received:", data);  // Debugging
-        const modelDropdown = document.getElementById("model");
-        modelDropdown.innerHTML = "";  // Clear previous options
-        data.forEach(model => {
-            const option = document.createElement("option");
-            option.value = model.Model;
-            option.textContent = model.Model;
-            modelDropdown.appendChild(option);
-        });
-        modelDropdown.disabled = false;
-    });
+
+    function calculateTotals() {
+        const unitPrice = parseFloat($('#unit-price').val()) || 0;
+        const quantity = parseInt($('#quantity').val(), 10) || 1;
+
+        const total = unitPrice * quantity;
+        const vat = total * 0.15;
+        const totalWithVat = total + vat;
+
+        // Update the corresponding fields
+        $('#total').val(total.toFixed(2));
+        $('#vat').val(vat.toFixed(2));
+        $('#total-with-vat').val(totalWithVat.toFixed(2));
+    }
+
 });
