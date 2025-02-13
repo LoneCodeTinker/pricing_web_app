@@ -1,36 +1,29 @@
 $(document).ready(function () {
-    let pricePerPage = 0; // Store price per page for books
-    let unitPrice = 0;    // General unit price for all items
-    let metrePrice = 0;    // Store price per page for banners
+    let pricePerPage = 0;  // Store price per page for books
+    let unitPrice = 0;     // General unit price for all items
+    let metrePrice = 0;    // Store price per square meter for banners
 
     // Handle item selection
     $('#items').on('change', function () {
         const selectedItem = $(this).val();
         console.log('Selected Item:', selectedItem); // Debugging log
 
+        // Reset UI
+        $('#models-label').text('Model:');
+        $('#book-options, #banner-options, #num-pages').hide();
+
         if (selectedItem === 'Books') {
             $('#models-label').text('Size:');
-            $('#book-options').show(); // Show book-specific fields
-            $('#num-pages').show();    // Ensure the number of pages field is visible
-            loadBookPricing();         // Load book-specific options
-        } else {
-            $('#models-label').text('Model:');
-            $('#book-options').hide(); // Hide book-specific options
-            $('#num-pages').hide();    // Hide number of pages field
-            pricePerPage = 0;          // Reset pricePerPage for non-book items
-        }
-        if (selectedItem === 'Banners') {
+            $('#book-options, #num-pages').show();
+            loadBookPricing(); // Load book-specific pricing options
+        } else if (selectedItem === 'Banners') {
             $('#models-label').text('Material:');
-            $('#banner-options').show(); // Show book-specific fields
-            loadBookPricing();         // Load book-specific options
-        } else {
-            $('#models-label').text('Model:');
-            $('#banner-options').hide(); // Hide book-specific options
+            $('#banner-options').show();
         }
 
         // Fetch models for the selected item
         fetchModels(selectedItem);
-        calculateTotals(); // Ensure totals are recalculated when switching items
+        calculateTotals(); // Ensure totals are recalculated
     });
 
     // Fetch models based on the selected item
@@ -72,10 +65,6 @@ $(document).ready(function () {
     // Handle model selection
     $('#models').on('change', function () {
         const selectedModel = $(this).find(':selected');
-        pricePerPage = parseFloat(selectedModel.val()) || 0; // Set pricePerPage for books
-        unitPrice = pricePerPage;                            // Default unit price for non-books
-        metrePrice = pricePerPage;                           // Set base price for Banner materials
-        $('#unit-price').val(unitPrice.toFixed(2));          // Update the unit price field
         calculateTotals();
     });
 
@@ -103,8 +92,7 @@ $(document).ready(function () {
                             <div>
                                 <input type="radio" id="${option['binding type']}" name="binding-type" value="${option['binding cost']}">
                                 <label for="${option['binding type']}">${option['binding type']} (${option['binding cost']}/unit)</label>
-                            </div>
-                        `;
+                            </div>`;
                         bookOptionsContainer.append(radioButton);
                     });
                 } else {
@@ -124,20 +112,37 @@ $(document).ready(function () {
 
     // Calculate totals
     function calculateTotals() {
+        const selectedModel = $('#models').find(':selected');
+        unitPrice = parseFloat(selectedModel.val()) || 0; // Default unit price for non-books
+        pricePerPage = unitPrice; // Set pricePerPage for books
+        metrePrice = unitPrice; // Set base price for Banner materials
         const quantity = parseInt($('#quantity').val()) || 0;
         const numPages = parseInt($('#num-pages').val()) || 0;
+        const total_num_of_pages = quantity * numPages;
+        const highest_price = pricePerPage;
+        const lowest_price = highest_price / 4;
+        const price_difference = highest_price - lowest_price;
         const bindingCost = parseFloat($('input[name="binding-type"]:checked').val()) || 0;
         const bnrH = parseInt($('#banner-height').val()) || 0;
         const bnrW = parseInt($('#banner-width').val()) || 0;
 
         // Calculate unit price dynamically for books
         if ($('#items').val() === 'Books') {
+//            if (total_num_of_pages > 1000 && total_num_of_pages < 5000) {
+//                let discount_factor = (total_num_of_pages - 1000) / (5000 - 1000);
+//                pricePerPage = highest_price - (price_difference * discount_factor);
+//            } else if (total_num_of_pages >= 5000) {
+//                pricePerPage = lowest_price;
+//            }
+            let discount_factor = (total_num_of_pages - 1000) / (5000 - 1000);
+//            pricePerPage = Math.max(Math.min(highest_price - price_difference * discount_factor, highest_price), lowest_price);
+            pricePerPage = Math.max(Math.min(highest_price - (highest_price - lowest_price) * (total_num_of_pages - 1000) / (5000 - 1000), highest_price), lowest_price);
             unitPrice = (numPages * pricePerPage) + bindingCost;
         }
 
         // Calculate unit price dynamically for banners
         if ($('#items').val() === 'Banners') {
-            unitPrice = ((bnrH * bnrW)/10000) * metrePrice;
+            unitPrice = ((bnrH * bnrW) / 10000) * metrePrice;
         }
 
         // Calculate totals
@@ -152,6 +157,7 @@ $(document).ready(function () {
         $('#total-with-vat').val(totalWithVat.toFixed(2));
     }
 });
+
 // Allow only numeric input in number fields
 document.addEventListener('input', function (event) {
     const target = event.target;
