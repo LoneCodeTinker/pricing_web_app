@@ -1,6 +1,7 @@
 $(document).ready(function () {
     let pricePerPage = 0; // Store price per page for books
     let unitPrice = 0;    // General unit price for all items
+    let metrePrice = 0;    // Store price per page for banners
 
     // Handle item selection
     $('#items').on('change', function () {
@@ -17,6 +18,14 @@ $(document).ready(function () {
             $('#book-options').hide(); // Hide book-specific options
             $('#num-pages').hide();    // Hide number of pages field
             pricePerPage = 0;          // Reset pricePerPage for non-book items
+        }
+        if (selectedItem === 'Banners') {
+            $('#models-label').text('Material:');
+            $('#banner-options').show(); // Show book-specific fields
+            loadBookPricing();         // Load book-specific options
+        } else {
+            $('#models-label').text('Model:');
+            $('#banner-options').hide(); // Hide book-specific options
         }
 
         // Fetch models for the selected item
@@ -65,6 +74,7 @@ $(document).ready(function () {
         const selectedModel = $(this).find(':selected');
         pricePerPage = parseFloat(selectedModel.val()) || 0; // Set pricePerPage for books
         unitPrice = pricePerPage;                            // Default unit price for non-books
+        metrePrice = pricePerPage;                           // Set base price for Banner materials
         $('#unit-price').val(unitPrice.toFixed(2));          // Update the unit price field
         calculateTotals();
     });
@@ -108,7 +118,7 @@ $(document).ready(function () {
     }
 
     // Handle changes in binding type, number of pages, and quantity
-    $('body').on('change', 'input[name="binding-type"], #num-pages, #quantity', function () {
+    $('body').on('change', 'input[name="binding-type"], #num-pages, #quantity, #banner-height, #banner-width', function () {
         calculateTotals();
     });
 
@@ -117,10 +127,17 @@ $(document).ready(function () {
         const quantity = parseInt($('#quantity').val()) || 0;
         const numPages = parseInt($('#num-pages').val()) || 0;
         const bindingCost = parseFloat($('input[name="binding-type"]:checked').val()) || 0;
+        const bnrH = parseInt($('#banner-height').val()) || 0;
+        const bnrW = parseInt($('#banner-width').val()) || 0;
 
         // Calculate unit price dynamically for books
         if ($('#items').val() === 'Books') {
             unitPrice = (numPages * pricePerPage) + bindingCost;
+        }
+
+        // Calculate unit price dynamically for banners
+        if ($('#items').val() === 'Banners') {
+            unitPrice = ((bnrH * bnrW)/10000) * metrePrice;
         }
 
         // Calculate totals
@@ -133,5 +150,15 @@ $(document).ready(function () {
         $('#total').val(total.toFixed(2));
         $('#vat').val(vat.toFixed(2));
         $('#total-with-vat').val(totalWithVat.toFixed(2));
+    }
+});
+// Allow only numeric input in number fields
+document.addEventListener('input', function (event) {
+    const target = event.target;
+
+    // Check if the input field has an ID of num-pages or quantity
+    if (target.id === 'num-pages' || target.id === 'quantity') {
+        // Remove any non-numeric characters
+        target.value = target.value.replace(/[^0-9]/g, '');
     }
 });
