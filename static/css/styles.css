@@ -145,3 +145,20 @@ input {
     margin-bottom: 10px;
     box-sizing: border-box;
 }
+
+td .remove-item {
+    background-color: transparent;
+    border-radius: 10px;
+}
+
+td .remove-item:hover {
+    background-color: red;
+    color: white;
+    border-radius: 10px;
+    stroke: white;
+}
+
+td:has(.remove-item).hover {
+    background-color: red;
+    stroke: white;
+}
