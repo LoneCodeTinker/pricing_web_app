@@ -6,34 +6,20 @@ document.addEventListener("DOMContentLoaded", function() {
     // Handle item selection
     document.getElementById('items').addEventListener('change', function () {
         const selectedItem = this.value;
-        console.log('Selected Item:', selectedItem); // Debugging log
 
         // Reset UI
 
         // Hide elements if they exist
         document.querySelectorAll('#book-options, #banner-options, #num-pages').forEach(el => {
             if (el) el.style.display = 'none';
+// Update text content if the element exists
         });
 
-        // Update text content if the element exists
+// Update text content if the element exists
         const modelsLabel = document.getElementById('models-label');
         if (modelsLabel) modelsLabel.textContent = 'Model:';
 
-//        document.getElementById('models-label').textContent = 'Model:';
-//        document.querySelectorAll('#book-options, #banner-options, #num-pages').forEach(el => el.style.display = 'none');
-
-//        let bookOptions = document.getElementById("book-options");
-//        if (bookOptions) bookOptions.style.display = "none";
-//
-//        let bannerOptions = document.getElementById("banner-options");
-//        if (bannerOptions) bannerOptions.style.display = "none";
-//
-//        let numPages = document.getElementById("num-pages");
-//        if (numPages) numPages.style.display = "none";
-
         if (selectedItem === 'Books') {
-            // Set text content of #models-label
-            const modelsLabel = document.getElementById('models-label');
             if (modelsLabel) modelsLabel.textContent = 'Size:';
 
             // Show #book-options and #num-pages
@@ -42,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             loadBookPricing(); // Load book-specific pricing options
         } else if (selectedItem === 'Banners') {
-            // Update text content if element exists
+// Update text content if element exists
             const modelsLabel = document.getElementById('models-label');
             if (modelsLabel) modelsLabel.textContent = 'Material:';
 
@@ -51,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (bannerOptions) bannerOptions.style.display = 'block'; // or 'flex', 'grid', etc. based on your layout
         }
 
-        // Fetch models for the selected item
+// Fetch models for the selected item
         fetchModels(selectedItem);
         calculateTotals(); // Ensure totals are recalculated
     });
@@ -65,53 +51,52 @@ document.addEventListener("DOMContentLoaded", function() {
             },
             body: JSON.stringify({ item: selectedItem }),
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const modelsDropdown = document.getElementById('models');
-                modelsDropdown.innerHTML = ''; // Clear existing options
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const modelsDropdown = document.getElementById('models');
+            modelsDropdown.innerHTML = ''; // Clear existing options
 
-                if (data.length === 0) {
-                    modelsDropdown.innerHTML = '<option value="" disabled>No models available</option>';
-                    modelsDropdown.disabled = true;
-                    unitPrice = 0; // Reset unit price if no models are available
-                    document.getElementById('unit-price').value = '';
-                    calculateTotals();
-                    return;
-                }
+            if (data.length === 0) {
+                modelsDropdown.innerHTML = '<option value="" disabled>No models available</option>';
+                modelsDropdown.disabled = true;
+                unitPrice = 0; // Reset unit price if no models are available
+                document.getElementById('unit-price').value = '';
+                calculateTotals();
+                return;
+            }
 
-                modelsDropdown.disabled = false;
-                data.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model.Price;
-                    option.setAttribute('data-description', model.Description || 'No description');
-                    option.textContent = `${model.Model} - ${model.Description || 'No description'}`;
-                    modelsDropdown.appendChild(option);
-                });
-
-                modelsDropdown.selectedIndex = 0;
-                modelsDropdown.dispatchEvent(new Event('change')); // Trigger default selection
-            })
-            .catch(() => {
-                alert('Error fetching models. Please try again.');
+            modelsDropdown.disabled = false;
+            data.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.Price;
+                option.setAttribute('data-description', model.Description || 'No description');
+                option.textContent = `${model.Model} - ${model.Description || 'No description'}`;
+                modelsDropdown.appendChild(option);
             });
+
+            modelsDropdown.selectedIndex = 0;
+            modelsDropdown.dispatchEvent(new Event('change')); // Trigger default selection
+        })
+        .catch(() => {
+            alert('Error fetching models. Please try again.');
+        });
     }
 
-        // Handle model selection
-        document.getElementById('models').addEventListener('change', function () {
-            const selectedModel = this.options[this.selectedIndex];
-            calculateTotals();
-        });
+    // Handle model selection
+    document.getElementById('models').addEventListener('change', function () {
+        calculateTotals();
+    });
 
-        // Load book-specific pricing options
-        function loadBookPricing() {
-            fetch('/get_book_pricing', {
-        method: 'GET',
-    })
+    // Load book-specific pricing options
+    function loadBookPricing() {
+        fetch('/get_book_pricing', {
+            method: 'GET',
+        })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -157,48 +142,47 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-
     // Calculate totals
     function calculateTotals() {
-    const selectedModel = document.getElementById('models').selectedOptions[0];
-    unitPrice = parseFloat(selectedModel.value) || 0; // Default unit price for non-books
-    pricePerPage = unitPrice; // Set pricePerPage for books
-    metrePrice = unitPrice; // Set base price for Banner materials
-    const quantity = parseInt(document.getElementById('quantity').value) || 0;
-    const numPages = parseInt(document.getElementById('num-pages').value) || 0;
-    const total_num_of_pages = quantity * numPages;
-    const highest_price = pricePerPage;
-    const lowest_price = highest_price / 4;
-    const price_difference = highest_price - lowest_price;
-    const bindingCost = parseFloat(document.querySelector('input[name="binding-type"]:checked')?.value) || 0;
-    const bnrH = parseInt(document.getElementById('banner-height').value) || 0;
-    const bnrW = parseInt(document.getElementById('banner-width').value) || 0;
+        const selectedModel = document.getElementById('models').selectedOptions[0];
+        unitPrice = parseFloat(selectedModel.value) || 0; // Default unit price for non-books
+        pricePerPage = unitPrice; // Set pricePerPage for books
+        metrePrice = unitPrice; // Set base price for Banner materials
+        const quantity = parseInt(document.getElementById('quantity').value) || 0;
+        const numPages = parseInt(document.getElementById('num-pages').value) || 0;
+        const total_num_of_pages = quantity * numPages;
+        const highest_price = pricePerPage;
+        const lowest_price = highest_price / 4;
+        const price_difference = highest_price - lowest_price;
+        const bindingCost = parseFloat(document.querySelector('input[name="binding-type"]:checked')?.value) || 0;
+        const bnrH = parseInt(document.getElementById('banner-height').value) || 0;
+        const bnrW = parseInt(document.getElementById('banner-width').value) || 0;
 
-    // Calculate unit price dynamically for books
-    if (document.getElementById('items').value === 'Books') {
-        let discount_factor = (total_num_of_pages - 1000) / (5000 - 1000);
-        pricePerPage = Math.max(
-            Math.min(highest_price - price_difference * discount_factor, highest_price),
-            lowest_price
-        );
-        unitPrice = (numPages * pricePerPage) + bindingCost;
-    }
+        // Calculate unit price dynamically for books
+        if (document.getElementById('items').value === 'Books') {
+            let discount_factor = (total_num_of_pages - 1000) / (5000 - 1000);
+            pricePerPage = Math.max(
+                Math.min(highest_price - price_difference * discount_factor, highest_price),
+                lowest_price
+            );
+            unitPrice = (numPages * pricePerPage) + bindingCost;
+        }
 
-    // Calculate unit price dynamically for banners
-    if (document.getElementById('items').value === 'Banners') {
-        unitPrice = ((bnrH * bnrW) / 10000) * metrePrice;
-    }
+        // Calculate unit price dynamically for banners
+        if (document.getElementById('items').value === 'Banners') {
+            unitPrice = ((bnrH * bnrW) / 10000) * metrePrice;
+        }
 
-    // Calculate totals
-    const total = unitPrice * quantity;
-    const vat = total * 0.15;
-    const totalWithVat = total + vat;
+        // Calculate totals
+        const total = unitPrice * quantity;
+        const vat = total * 0.15;
+        const totalWithVat = total + vat;
 
-    // Update UI
-    document.getElementById('unit-price').value = unitPrice.toFixed(2);
-    document.getElementById('total').value = total.toFixed(2);
-    document.getElementById('vat').value = vat.toFixed(2);
-    document.getElementById('total-with-vat').value = totalWithVat.toFixed(2);
+        // Update UI
+        document.getElementById('unit-price').value = unitPrice.toFixed(2);
+        document.getElementById('total').value = total.toFixed(2);
+        document.getElementById('vat').value = vat.toFixed(2);
+        document.getElementById('total-with-vat').value = totalWithVat.toFixed(2);
     }
 });
 
@@ -235,9 +219,9 @@ function updateTotals() {
 document.addEventListener('input', event => {
     const target = event.target;
 
-    // Check if the input field has an ID of num-pages or quantity
+// Check if the input field has an ID of num-pages or quantity
     if (target.id === 'num-pages' || target.id === 'quantity') {
-        // Remove any non-numeric characters
+// Remove any non-numeric characters
         target.value = target.value.replace(/\D/g, '');
 
         // Remove leading zeros (optional)
@@ -325,30 +309,29 @@ document.getElementById('add-item').addEventListener('click', function(event) {
     });
 });
 
-    // Remove item from table
-    document.getElementById('quotation-table').addEventListener('click', event => {
-        if (event.target.classList.contains('remove-item')) {
-            // Remove the closest row
-            const row = event.target.closest('tr');
-            if (row) row.remove();
+// Remove item from table
+document.getElementById('quotation-table').addEventListener('click', event => {
+    if (event.target.classList.contains('remove-item')) {
+// Remove the closest row
+        const row = event.target.closest('tr');
+        if (row) row.remove();
 
-            // Get the index of the "S/N" column
-            const snHeader = Array.from(document.querySelectorAll('#quotation-table thead th')).find(th => th.textContent.includes('S/N'));
-            const snIndex = snHeader ? Array.from(snHeader.parentElement.children).indexOf(snHeader) : -1;
+// Get the index of the "S/N" column
+        const snHeader = Array.from(document.querySelectorAll('#quotation-table thead th')).find(th => th.textContent.includes('S/N'));
+        const snIndex = snHeader ? Array.from(snHeader.parentElement.children).indexOf(snHeader) : -1;
 
-            // Renumber the serial numbers correctly
-            document.querySelectorAll('#quotation-table tbody tr').forEach((row, index) => {
-                const snCell = row.querySelector(`td:nth-child(${snIndex + 1})`);
-                if (snCell) snCell.textContent = index + 1;
-            });
+// Renumber the serial numbers correctly
+        document.querySelectorAll('#quotation-table tbody tr').forEach((row, index) => {
+            const snCell = row.querySelector(`td:nth-child(${snIndex + 1})`);
+            if (snCell) snCell.textContent = index + 1;
+        });
 
-            // Update totals
-            updateTotals();
-        }
-    });
+        updateTotals();
+    }
+});
 
-    // Save as PDF (Placeholder)
-    document.getElementById('save-quotation')?.addEventListener('click', (event) => {
-        event.preventDefault(); // Prevent default if it's a submit button
-        alert("Generate PDF functionality goes here!");
-    });
+// Save as PDF (Placeholder)
+document.getElementById('save-quotation')?.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default if it's a submit button
+    alert("Generate PDF functionality goes here!");
+});
