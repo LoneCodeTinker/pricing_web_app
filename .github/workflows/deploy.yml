@@ -8,6 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write  # Allow writing to repo
+      pages: write     # Allow GitHub Pages deployment
+      id-token: write  # Required for authentication
 
     steps:
       - name: Checkout Repository
