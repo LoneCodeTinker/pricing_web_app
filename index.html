@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Pricing App</h1>
+
+        <!-- Item Selection -->
+        <div class="form-group">
+            <label for="items">Select Item:</label>
+            <select id="items">
+                <option value="">-- Select an Item --</option>
+                {% for item in items %}
+                <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Model Selection -->
+        <div class="form-group">
+            <label for="models">Select Model:</label>
+            <select id="models" disabled>
+                <option value="">-- Select a Model --</option>
+            </select>
+        </div>
+
+        <!-- Dynamic Options for Books -->
+        <div id="book-options" class="bordered-container" style="display: none;">
+            <label class="bordered-label">Book Options</label>
+            <div class="radio-group">
+                <label>Select Binding Type:</label>
+                <!-- Binding options dynamically generated here -->
+            </div>
+            <div class="form-group">
+                <label for="num-pages">Number of Pages:</label>
+                <input type="number" id="num-pages" min="1" placeholder="Enter number of pages">
+            </div>
+        </div>
+
+        <!-- Dynamic Options for Banners -->
+        <div id="banner-options" class="bordered-container" style="display: none;">
+            <label class="bordered-label">Print Size</label>
+            <div class="inline">
+                <div>
+                    <label for="banner-height">Height (cm):</label>
+                    <input type="number" id="banner-height" min="1" placeholder="Enter height in cm">
+                </div>
+                <div>
+                    <label for="banner-width">Width (cm):</label>
+                    <input type="number" id="banner-width" min="1" placeholder="Enter width in cm">
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Form -->
+        <form id="pricing-form" class="bordered-container">
+            <label class="bordered-label">Pricing Details</label>
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" value="1" min="1">
+            </div>
+            <div class="form-group">
+                <label for="unit-price">Unit Price:</label>
+                <input type="text" id="unit-price" readonly>
+            </div>
+            <div class="form-group">
+                <label for="total">Total (without VAT):</label>
+                <input type="text" id="total" readonly aria-live="polite">
+            </div>
+            <div class="form-group">
+                <label for="vat">VAT (15%):</label>
+                <input type="text" id="vat" readonly>
+            </div>
+            <div class="form-group">
+                <label for="total-with-vat">Total (with VAT):</label>
+                <input type="text" id="total-with-vat" readonly>
+            </div>
+<!--            <button type="button" id="calculate">Calculate</button>-->
+
+            <!-- Add Item Button -->
+            <button id="add-item">Add Item</button>
+
+        </form>
+    </div>
+    <!-- Quotation Table -->
+    <div class="gap">
+        <h2>Quotation Summary</h2>
+        <table id="quotation-table" border="1">
+            <thead>
+                <tr>
+                    <th data-column="sn">S/N</th>
+                    <th data-column="Item">Item</th>
+                    <th data-column="Model">Model</th>
+                    <th data-column="Quantity">Quantity</th>
+                    <th data-column="UnitPrice">Unit Price</th>
+                    <th data-column="Total">Total</th>
+                    <th data-column="VAT">VAT (15%)</th>
+                    <th data-column="TotalWithVAT">Total with VAT</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Items will be added here -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: right;"><strong>Grand Total:</strong></td>
+                    <td id="grand-total">0.00</td>
+                    <td id="grand-vat">0.00</td>
+                    <td id="grand-total-vat">0.00</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Save Button -->
+    <button id="save-quotation">Save as PDF</button>
+
+</body>
+</html>
