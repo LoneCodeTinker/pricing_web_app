@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const dateInput = document.getElementById('date');
     const timeInput = document.getElementById('time');
     const phoneNumberInput = document.getElementById('phone-number');
+    const customerNameInput = document.getElementById('customer-name');
 
     const now = new Date();
     const formattedDate = now.toISOString().split('T')[0];
@@ -13,8 +14,26 @@ document.addEventListener("DOMContentLoaded", function() {
     // Ensure phone number field accepts numeric input only and is exactly 10 characters long
     phoneNumberInput.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        removeWarning('phone-number-warning');
+    });
+
+    // Remove warning when customer name is changed
+    customerNameInput.addEventListener('input', function() {
+        removeWarning('customer-name-warning');
+    });
+
+    // Remove warning when adding an item
+    document.getElementById('add-item').addEventListener('click', function() {
+        removeWarning('table-warning');
     });
 });
+
+function removeWarning(warningId) {
+    const warning = document.getElementById(warningId);
+    if (warning) {
+        warning.remove();
+    }
+}
 
 document.getElementById('save-quotation').addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
@@ -45,10 +64,7 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         isValid = false;
     } else {
         // Remove warning message if it exists
-        const warning = document.getElementById('customer-name-warning');
-        if (warning) {
-            warning.remove();
-        }
+        removeWarning('customer-name-warning');
     }
 
     // Check if phone number is empty or not exactly 10 characters
@@ -68,10 +84,7 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         isValid = false;
     } else {
         // Remove warning message if it exists
-        const warning = document.getElementById('phone-number-warning');
-        if (warning) {
-            warning.remove();
-        }
+        removeWarning('phone-number-warning');
     }
 
     // Check if the table has at least one item row
@@ -88,10 +101,7 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         isValid = false;
     } else {
         // Remove warning message if it exists
-        const warning = document.getElementById('table-warning');
-        if (warning) {
-            warning.remove();
-        }
+        removeWarning('table-warning');
     }
 
     if (!isValid) {
