@@ -74,6 +74,26 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         }
     }
 
+    // Check if the table has at least one item row
+    const tableBody = document.querySelector('#quotation-table tbody');
+    if (!tableBody || tableBody.rows.length === 0) {
+        const tableWarning = document.getElementById('table-warning');
+        if (!tableWarning) {
+            const warning = document.createElement('div');
+            warning.id = 'table-warning';
+            warning.style.color = 'red';
+            warning.textContent = '*at least one item is required to save the quotation';
+            tableBody.parentNode.appendChild(warning);
+        }
+        isValid = false;
+    } else {
+        // Remove warning message if it exists
+        const warning = document.getElementById('table-warning');
+        if (warning) {
+            warning.remove();
+        }
+    }
+
     if (!isValid) {
         return;
     }
