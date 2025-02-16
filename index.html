@@ -7,10 +7,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
     <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+    <script src="{{ url_for('static', filename='js/pdf.js') }}" defer></script>
 </head>
 <body>
     <div class="container">
         <h1>Pricing App</h1>
+
+        <!-- New fields for date, time, customer name, and phone number -->
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" id="date">
+        </div>
+        <div class="form-group">
+            <label for="time">Time:</label>
+            <input type="time" id="time">
+        </div>
+        <div class="form-group">
+            <label for="customer-name">Customer Name:</label>
+            <input type="text" id="customer-name" placeholder="Enter customer name">
+        </div>
+        <div class="form-group">
+            <label for="phone-number">Phone Number:</label>
+            <input type="tel" id="phone-number" placeholder="Enter phone number">
+        </div>
 
         <!-- Item Selection -->
         <div class="form-group">
@@ -82,11 +103,8 @@
                 <label for="total-with-vat">Total (with VAT):</label>
                 <input type="text" id="total-with-vat" readonly>
             </div>
-<!--            <button type="button" id="calculate">Calculate</button>-->
-
             <!-- Add Item Button -->
             <button id="add-item">Add Item</button>
-
         </form>
     </div>
     <!-- Quotation Table -->
@@ -123,6 +141,5 @@
 
     <!-- Save Button -->
     <button id="save-quotation">Save as PDF</button>
-
 </body>
 </html>
