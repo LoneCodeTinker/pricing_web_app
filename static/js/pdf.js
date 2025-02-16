@@ -14,6 +14,16 @@ document.getElementById('save-quotation').addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
+    // Get the date, time, and customer name for the file name
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value.replace(':', '');
+    let customerName = document.getElementById('customer-name').value.trim();
+
+    if (!customerName) {
+        alert('Please enter the customer name.');
+        return;
+    }
+
     // Add content to the PDF
     doc.text("Quotation Summary", 10, 10);
 
@@ -40,10 +50,6 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         });
     }
 
-    // Get the date and customer name for the file name
-    const date = document.getElementById('date').value;
-    const customerName = document.getElementById('customer-name').value || 'Customer';
-
     // Save the PDF with the desired file name
-    doc.save(`${date} - ${customerName}.pdf`);
+    doc.save(`${date} - ${customerName} - ${time}.pdf`);
 });
