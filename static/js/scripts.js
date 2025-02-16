@@ -184,6 +184,86 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('vat').value = vat.toFixed(2);
         document.getElementById('total-with-vat').value = totalWithVat.toFixed(2);
     }
+
+    document.getElementById('add-item').addEventListener('click', function(event) {
+        event.preventDefault();
+
+        const requiredFields = [
+            { element: document.getElementById('items'), name: 'Item' },
+            { element: document.getElementById('models'), name: 'Model' },
+            { element: document.getElementById('quantity'), name: 'Quantity' }
+        ];
+
+        const missingFields = requiredFields
+            .filter(({ element, name }) => !element?.value.trim())
+            .map(({ name }) => name);
+
+        if (missingFields.length) {
+            alert(`Please fill in: ${missingFields.join(', ')}`);
+            return;
+        }
+
+        // Get values from fields
+        const item = document.getElementById('items')?.value;
+        const model = document.getElementById('models')?.value;
+        const quantity = document.getElementById('quantity')?.value;
+        const unitPrice = document.getElementById('unit-price')?.value;
+        const total = document.getElementById('total')?.value;
+        const vat = document.getElementById('vat')?.value;
+        const totalWithVat = document.getElementById('total-with-vat')?.value;
+
+        // Get row count
+        const rowCount = document.querySelectorAll('#quotation-table tbody tr').length + 1;
+
+        // Create new table row
+        const newRow = `
+            <tr>
+                <td>${rowCount}</td>
+                <td>${item}</td>
+                <td>${model}</td>
+                <td>${quantity}</td>
+                <td>${unitPrice}</td>
+                <td>${total}</td>
+                <td>${vat}</td>
+                <td>${totalWithVat}</td>
+                <td><button class="remove-item">❌</button></td>
+            </tr>`;
+
+        // Append to table
+        const tbody = document.querySelector('#quotation-table tbody');
+        if (tbody) {
+            tbody.insertAdjacentHTML('beforeend', newRow);
+        }
+
+        updateTotals();
+
+        // Reset form fields
+        const itemsSelect = document.getElementById('items');
+        const modelsSelect = document.getElementById('models');
+        const quantityInput = document.getElementById('quantity');
+
+        if (itemsSelect) itemsSelect.value = '';
+        if (modelsSelect) {
+            modelsSelect.innerHTML = '<option value="">-- Select a Model --</option>';
+            modelsSelect.disabled = true;
+        }
+        if (quantityInput) quantityInput.value = '1';
+
+        // Clear other fields
+        ['num-pages', 'banner-height', 'banner-width', 'unit-price',
+         'total', 'vat', 'total-with-vat'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+        // Add remove item handler for new row
+        document.querySelector('#quotation-table').addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-item')) {
+                e.target.closest('tr').remove();
+                updateTotals();
+            }
+        });
+    });
 });
 
 function getColumnIndex(columnName) {
@@ -227,86 +307,6 @@ document.addEventListener('input', event => {
         // Remove leading zeros (optional)
         target.value = target.value.replace(/^0+/, '') || '1';
     }
-});
-
-document.getElementById('add-item').addEventListener('click', function(event) {
-    event.preventDefault();
-
-    const requiredFields = [
-        { element: document.getElementById('items'), name: 'Item' },
-        { element: document.getElementById('models'), name: 'Model' },
-        { element: document.getElementById('quantity'), name: 'Quantity' }
-    ];
-
-    const missingFields = requiredFields
-        .filter(({ element, name }) => !element?.value.trim())
-        .map(({ name }) => name);
-
-    if (missingFields.length) {
-        alert(`Please fill in: ${missingFields.join(', ')}`);
-        return;
-    }
-
-    // Get values from fields
-    const item = document.getElementById('items')?.value;
-    const model = document.getElementById('models')?.value;
-    const quantity = document.getElementById('quantity')?.value;
-    const unitPrice = document.getElementById('unit-price')?.value;
-    const total = document.getElementById('total')?.value;
-    const vat = document.getElementById('vat')?.value;
-    const totalWithVat = document.getElementById('total-with-vat')?.value;
-
-    // Get row count
-    const rowCount = document.querySelectorAll('#quotation-table tbody tr').length + 1;
-
-    // Create new table row
-    const newRow = `
-        <tr>
-            <td>${rowCount}</td>
-            <td>${item}</td>
-            <td>${model}</td>
-            <td>${quantity}</td>
-            <td>${unitPrice}</td>
-            <td>${total}</td>
-            <td>${vat}</td>
-            <td>${totalWithVat}</td>
-            <td><button class="remove-item">❌</button></td>
-        </tr>`;
-
-    // Append to table
-    const tbody = document.querySelector('#quotation-table tbody');
-    if (tbody) {
-        tbody.insertAdjacentHTML('beforeend', newRow);
-    }
-
-    updateTotals();
-
-    // Reset form fields
-    const itemsSelect = document.getElementById('items');
-    const modelsSelect = document.getElementById('models');
-    const quantityInput = document.getElementById('quantity');
-
-    if (itemsSelect) itemsSelect.value = '';
-    if (modelsSelect) {
-        modelsSelect.innerHTML = '<option value="">-- Select a Model --</option>';
-        modelsSelect.disabled = true;
-    }
-    if (quantityInput) quantityInput.value = '1';
-
-    // Clear other fields
-    ['num-pages', 'banner-height', 'banner-width', 'unit-price',
-     'total', 'vat', 'total-with-vat'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-
-    // Add remove item handler for new row
-    document.querySelector('#quotation-table').addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-item')) {
-            e.target.closest('tr').remove();
-            updateTotals();
-        }
-    });
 });
 
 // Remove item from table

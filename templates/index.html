@@ -7,10 +7,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
     <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h1>Pricing App</h1>
+
+        <!-- New fields for date, time, customer name, and phone number -->
+        <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" id="date">
+        </div>
+        <div class="form-group">
+            <label for="time">Time:</label>
+            <input type="time" id="time">
+        </div>
+        <div class="form-group">
+            <label for="customer-name">Customer Name:</label>
+            <input type="text" id="customer-name" placeholder="Enter customer name">
+        </div>
+        <div class="form-group">
+            <label for="phone-number">Phone Number:</label>
+            <input type="tel" id="phone-number" placeholder="Enter phone number">
+        </div>
 
         <!-- Item Selection -->
         <div class="form-group">
@@ -124,5 +144,52 @@
     <!-- Save Button -->
     <button id="save-quotation">Save as PDF</button>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const dateInput = document.getElementById('date');
+            const timeInput = document.getElementById('time');
+
+            const now = new Date();
+            const formattedDate = now.toISOString().split('T')[0];
+            const formattedTime = now.toTimeString().split(' ')[0].slice(0, 5);
+
+            if (dateInput) dateInput.value = formattedDate;
+            if (timeInput) timeInput.value = formattedTime;
+        });
+
+        document.getElementById('save-quotation').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add content to the PDF
+            doc.text("Quotation Summary", 10, 10);
+
+            // Add table content using autoTable
+            const table = document.getElementById('quotation-table');
+            if (table) {
+                const rows = [];
+                const headers = [];
+                table.querySelectorAll('thead th').forEach(th => headers.push(th.innerText));
+                table.querySelectorAll('tbody tr').forEach(tr => {
+                    const row = [];
+                    tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
+                    rows.push(row);
+                });
+
+                doc.autoTable({
+                    head: [headers],
+                    body: rows,
+                    startY: 20,
+                    theme: 'grid',
+                    styles: { fontSize: 8 },
+                    headStyles: { fillColor: [255, 0, 0] },
+                    margin: { top: 20 }
+                });
+            }
+
+            // Save the PDF
+            doc.save('quotation.pdf');
+        });
+    </script>
 </body>
 </html>
