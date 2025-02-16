@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     const dateInput = document.getElementById('date');
     const timeInput = document.getElementById('time');
+    const phoneNumberInput = document.getElementById('phone-number');
 
     const now = new Date();
     const formattedDate = now.toISOString().split('T')[0];
@@ -8,6 +9,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (dateInput) dateInput.value = formattedDate;
     if (timeInput) timeInput.value = formattedTime;
+
+    // Ensure phone number field accepts numeric input only and is exactly 10 characters long
+    phoneNumberInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
 });
 
 document.getElementById('save-quotation').addEventListener('click', function() {
@@ -45,8 +51,8 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         }
     }
 
-    // Check if phone number is empty
-    if (!phoneNumber) {
+    // Check if phone number is empty or not exactly 10 characters
+    if (!phoneNumber || phoneNumber.length !== 10) {
         const phoneNumberField = document.getElementById('phone-number');
         phoneNumberField.focus();
 
@@ -56,7 +62,7 @@ document.getElementById('save-quotation').addEventListener('click', function() {
             warning = document.createElement('div');
             warning.id = 'phone-number-warning';
             warning.style.color = 'red';
-            warning.textContent = '*this field is required to save the quotation';
+            warning.textContent = '*this field must be exactly 10 digits to save the quotation';
             phoneNumberField.parentNode.appendChild(warning);
         }
         isValid = false;
