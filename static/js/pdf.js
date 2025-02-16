@@ -110,6 +110,8 @@ document.getElementById('save-quotation').addEventListener('click', function() {
 
     // Add content to the PDF
     doc.text("Quotation Summary", 10, 10);
+    doc.text(`Customer Name: ${customerName}`, 10, 20);
+    doc.text(`Phone Number: ${phoneNumber}`, 10, 30);
 
     // Add table content using autoTable
     const table = document.getElementById('quotation-table');
@@ -126,7 +128,7 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         doc.autoTable({
             head: [headers],
             body: rows,
-            startY: 20,
+            startY: 40,
             theme: 'grid',
             styles: { fontSize: 8 },
             headStyles: { fillColor: [255, 0, 0] },

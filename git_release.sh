@@ -26,4 +26,4 @@ echo "Release $version has been pushed to main and v$version branches."
 
 # List of 10 tags
 echo "here's a list of latest 10 tags:"
-git tag --sort=-creatordate | head -n 10
+git tag --sort=creatordate | head -n 10
