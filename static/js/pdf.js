@@ -14,13 +14,61 @@ document.getElementById('save-quotation').addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Get the date, time, and customer name for the file name
+    // Get the date, time, customer name, and phone number for the file name
     const date = document.getElementById('date').value;
     const time = document.getElementById('time').value.replace(':', '');
     let customerName = document.getElementById('customer-name').value.trim();
+    let phoneNumber = document.getElementById('phone-number').value.trim();
 
+    let isValid = true;
+
+    // Check if customer name is empty
     if (!customerName) {
-        alert('Please enter the customer name.');
+        const customerNameField = document.getElementById('customer-name');
+        customerNameField.focus();
+
+        // Display warning message
+        let warning = document.getElementById('customer-name-warning');
+        if (!warning) {
+            warning = document.createElement('div');
+            warning.id = 'customer-name-warning';
+            warning.style.color = 'red';
+            warning.textContent = '*this field is required to save the quotation';
+            customerNameField.parentNode.appendChild(warning);
+        }
+        isValid = false;
+    } else {
+        // Remove warning message if it exists
+        const warning = document.getElementById('customer-name-warning');
+        if (warning) {
+            warning.remove();
+        }
+    }
+
+    // Check if phone number is empty
+    if (!phoneNumber) {
+        const phoneNumberField = document.getElementById('phone-number');
+        phoneNumberField.focus();
+
+        // Display warning message
+        let warning = document.getElementById('phone-number-warning');
+        if (!warning) {
+            warning = document.createElement('div');
+            warning.id = 'phone-number-warning';
+            warning.style.color = 'red';
+            warning.textContent = '*this field is required to save the quotation';
+            phoneNumberField.parentNode.appendChild(warning);
+        }
+        isValid = false;
+    } else {
+        // Remove warning message if it exists
+        const warning = document.getElementById('phone-number-warning');
+        if (warning) {
+            warning.remove();
+        }
+    }
+
+    if (!isValid) {
         return;
     }
 

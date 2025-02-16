@@ -333,5 +333,5 @@ document.getElementById('quotation-table').addEventListener('click', event => {
 // Save as PDF (Placeholder)
 document.getElementById('save-quotation')?.addEventListener('click', (event) => {
     event.preventDefault(); // Prevent default if it's a submit button
-    alert("Generate PDF functionality goes here!");
+    // alert("Generate PDF functionality goes here!");
 });
