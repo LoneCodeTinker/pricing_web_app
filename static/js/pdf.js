@@ -40,6 +40,10 @@ document.getElementById('save-quotation').addEventListener('click', function() {
         });
     }
 
-    // Save the PDF
-    doc.save('quotation.pdf');
+    // Get the date and customer name for the file name
+    const date = document.getElementById('date').value;
+    const customerName = document.getElementById('customer-name').value || 'Customer';
+
+    // Save the PDF with the desired file name
+    doc.save(`${date} - ${customerName}.pdf`);
 });
